@@ -6,8 +6,8 @@ const puppeteer = require("puppeteer");
     args: ["--no-sandbox"],
   });
   const page = await browser.newPage();
-  await page.goto("http://google.com/");
-  await page.screenshot({ path: "./img/google.png" });
+  await page.goto("test:3000");
+  await page.screenshot({ path: "./img/react.png" });
 
   await browser.close();
 })();

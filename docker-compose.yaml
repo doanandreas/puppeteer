@@ -1,7 +1,11 @@
 version: "3"
 services:
+  test:
+    build: ./yjs-webrtc
+    ports:
+      - 3000:3000
   puppeteer:
-    build: .
+    build: ./puppeteer
     volumes:
       - /app/node_modules
       - ./img:/app/img

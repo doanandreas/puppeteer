@@ -15,7 +15,7 @@ const puppeteer = require("puppeteer");
     waitUntil: "networkidle0",
   });
   await page.screenshot({ path: path.join(__dirname, "img", "test.png") });
-  await page.evaluate(() => connectToRoom(PEER_ID));
+  await page.evaluate((id) => connectToRoom(id), PEER_ID);
 
   // await browser.close();
 })();

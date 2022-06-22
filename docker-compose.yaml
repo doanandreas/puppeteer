@@ -1,0 +1,7 @@
+version: "3"
+services:
+  puppeteer:
+    build: .
+    volumes:
+      - /app/node_modules
+      - ./img:/app/img

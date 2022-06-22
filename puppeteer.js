@@ -1,7 +1,7 @@
 const path = require("path");
 const puppeteer = require("puppeteer");
 
-require('dotenv').config()
+require("dotenv").config();
 
 (async () => {
   const browser = await puppeteer.launch({

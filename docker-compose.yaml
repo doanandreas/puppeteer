@@ -2,3 +2,5 @@ version: "3"
 services:
   puppeteer:
     build: .
+    environment:
+      - PEER_ID=A

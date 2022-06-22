@@ -19,4 +19,4 @@ RUN npm install
 
 COPY . .
 
-CMD ["node", "example"]
+CMD npm start

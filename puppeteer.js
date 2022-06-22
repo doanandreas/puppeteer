@@ -7,6 +7,7 @@ const puppeteer = require("puppeteer");
     args: ["--no-sandbox"],
   });
   const page = await browser.newPage();
+  const PEER_ID = process.env.PEER_ID;
 
   page.on("console", (msg) => console.log("LOG:", msg.text()));
 
@@ -14,7 +15,7 @@ const puppeteer = require("puppeteer");
     waitUntil: "networkidle0",
   });
   await page.screenshot({ path: path.join(__dirname, "img", "test.png") });
-  await page.evaluate(() => connectToRoom(process.env.PEER_ID));
+  await page.evaluate(() => connectToRoom(PEER_ID));
 
   // await browser.close();
 })();

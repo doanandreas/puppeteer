@@ -1,9 +1,17 @@
 import * as Y from "yjs";
 import { WebrtcProvider } from "y-webrtc";
 
+// logging purposes
 let readyPeer = 0;
-let currTrial = 0;
+
+// stop when number of trials reaches trialNumber
+let currTrials = 0;
+
+// batch final result array
 let rttArray = [];
+
+// re-start trial when all peers has responded
+let respondedPeers = new Set();
 
 const connectToRoom = (id, trialNumber, peerNumber) => {
   const doc = new Y.Doc();
@@ -16,6 +24,8 @@ const connectToRoom = (id, trialNumber, peerNumber) => {
 
   statusMap.observe((ymapEvent) => {
     ymapEvent.changes.keys.forEach((change, key) => {
+      // console.log("Status Map", JSON.stringify({ action: change.action, key }));
+
       if (change.action === "add" && statusMap.get(key) === "READY") {
         readyPeer++;
         console.log(
@@ -23,7 +33,7 @@ const connectToRoom = (id, trialNumber, peerNumber) => {
         );
 
         if (readyPeer === peerNumber) {
-          console.log("All peers are READY.");
+          console.log(`All peers are READY.`);
 
           doc.transact(() => {
             requestMap.set(id, new Date().getTime());
@@ -35,42 +45,42 @@ const connectToRoom = (id, trialNumber, peerNumber) => {
 
   requestMap.observe((ymapEvent) => {
     ymapEvent.changes.keys.forEach((change, key) => {
-      if (change.action === "add" || change.action === "update") {
-        console.log(
-          `Peer "${key}" request timestamp: "${requestMap.get(key)}".`
-        );
+      // console.log("Request Map", JSON.stringify({ action: change.action, key, value: requestMap.get(key) }));
 
-        if (key !== id) {
-          doc.transact(() => {
-            responseMap.set(`${id}:${key}`, new Date().getTime());
-          }, id);
+      // If request is coming from external peer(s)
+      if (key !== id) {
+        if (change.action === "add" || change.action === "update") {
+          responseMap.set(`${id}->${key}`, new Date().getTime());
         }
       }
     });
   });
 
-  // responseMap.observe((ymapEvent) => {
-  //   ymapEvent.changes.keys.forEach((change, key) => {
-
-  //   });
-  // });
-
   responseMap.observe((ymapEvent) => {
     ymapEvent.changes.keys.forEach((change, key) => {
-      if (change.action === "add") {
-        console.log(
-          `Property "${key}" was added. Current time: "${new Date().getTime()}".`
-        );
-      } else if (change.action === "update") {
-        console.log(
-          `Property "${key}" was updated. New value: "${responseMap.get(
-            key
-          )}". Previous value: "${change.oldValue}".`
-        );
-      } else if (change.action === "delete") {
-        console.log(
-          `Property "${key}" was deleted. New value: undefined. Previous value: "${change.oldValue}".`
-        );
+      // console.log("Response Map", JSON.stringify({ action: change.action, key, value: responseMap.get(key) }));
+
+      const responder = key.split("->")[0];
+      const requester = key.split("->")[1];
+
+      // If we are the requester
+      if (requester === id) {
+        const rtt = new Date().getTime() - requestMap.get(requester);
+        rttArray.push(rtt);
+        respondedPeers.add(responder);
+
+        if (respondedPeers.size === peerNumber - 1) {
+          currTrials++;
+          respondedPeers.clear();
+
+          if (currTrials < trialNumber) {
+            requestMap.set(id, new Date().getTime());
+          } else {
+            console.log(
+              `RTT results: ${rttArray.toString()}`
+            );
+          }
+        }
       }
     });
   });

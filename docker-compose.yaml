@@ -4,4 +4,6 @@ services:
     build: .
     volumes:
       - /app/node_modules
-      - ${PWD}/result.txt:/app/result.txt
+      - type: bind
+        source: ./result.txt
+        target: /app/result.txt

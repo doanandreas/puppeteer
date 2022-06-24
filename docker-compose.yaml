@@ -4,4 +4,4 @@ services:
     build: .
     volumes:
       - /app/node_modules
-      - ./img:/app/img
+      - ./result.txt:/app/result.txt

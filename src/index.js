@@ -13,7 +13,7 @@ let rttArray = [];
 // re-start trial when all peers has responded
 let respondedPeers = new Set();
 
-const connectToRoom = (id, trialNumber, peerNumber) => {
+const connectToRoom = (id, trialNumber, peerNumber, resultExport) => {
   const doc = new Y.Doc();
   const statusMap = doc.getMap("status");
   const requestMap = doc.getMap("request");
@@ -76,9 +76,8 @@ const connectToRoom = (id, trialNumber, peerNumber) => {
           if (currTrials < trialNumber) {
             requestMap.set(id, new Date().getTime());
           } else {
-            console.log(
-              `RTT results: ${rttArray.toString()}`
-            );
+            console.log(`RTT results: ${rttArray.toString()}`);
+            resultExport(rttArray.toString());
           }
         }
       }

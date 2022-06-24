@@ -4,9 +4,14 @@ const puppeteer = require("puppeteer");
 const shortUUID = require("short-uuid");
 const generator = shortUUID();
 
-require("dotenv").config();
+const fs = require("fs");
 
+require("dotenv").config();
 const { TRIAL_NUMBER, PEER_NUMBER } = process.env;
+
+const exportResultToTxt = (res) => {
+  fs.writeFileSync(path.join(__dirname, "result.txt"), res);
+};
 
 (async () => {
   // const browser = await puppeteer.launch({
@@ -17,6 +22,7 @@ const { TRIAL_NUMBER, PEER_NUMBER } = process.env;
   const page = await browser.newPage();
 
   page.on("console", (msg) => console.log("LOG:", msg.text()));
+  await page.exposeFunction("exportResultToTxt", exportResultToTxt);
 
   // await page.goto(`file://${path.join(__dirname, "dist", "index.html")}`, {
   //   waitUntil: "networkidle0",
@@ -27,13 +33,11 @@ const { TRIAL_NUMBER, PEER_NUMBER } = process.env;
       waitUntil: "networkidle0",
     }
   );
-  await page.screenshot({ path: path.join(__dirname, "img", "test.png") });
   await page.evaluate(
-    (id, trials, peers) => connectToRoom(id, trials, peers),
+    (id, trials, peers, resultExport) =>
+      connectToRoom(id, trials, peers, exportResultToTxt),
     generator.generate(),
     Number(TRIAL_NUMBER),
     Number(PEER_NUMBER)
   );
-
-  // await browser.close();
 })();

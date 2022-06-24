@@ -4,4 +4,4 @@ services:
     build: .
     volumes:
       - /app/node_modules
-      - result.txt:/app/result.txt
+      - ${PWD}/result.txt:/app/result.txt
